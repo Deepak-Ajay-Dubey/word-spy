@@ -1,0 +1,6 @@
+{
+  "name": "Word Spy",
+  "description": "A single-device pass-and-play social deduction word party game where Civilians, Undercovers, and Mr. White battle to deduce secret words and bluff.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
