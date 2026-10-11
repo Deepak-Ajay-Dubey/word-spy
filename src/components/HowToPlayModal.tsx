@@ -84,11 +84,22 @@ export function HowToPlayModal({ isOpen, onClose }: HowToPlayModalProps) {
           <div className="space-y-1.5">
             <h3 className="font-semibold text-[#EDE6D6] text-xs flex items-center gap-1">
               <Trophy className="w-3.5 h-3.5 text-[#B08D57]" />
-              <span>Scoring</span>
+              <span>Points & Scoring</span>
             </h3>
-            <p className="text-[11px] text-[#EDE6D6]/70">
-              At the end of each game, <strong>+1 point</strong> is awarded to every player on the winning side. Points carry over across games in your session.
-            </p>
+            <div className="space-y-1 text-[11px] text-[#EDE6D6]/70">
+              <p>
+                • <strong>Surviving Civilians:</strong> <strong>+2 points</strong> on civilian victory (eliminated civilians earn 0 points).
+              </p>
+              <p>
+                • <strong>Undercovers:</strong> <strong>+3 points</strong> if they deceive everyone to win.
+              </p>
+              <p>
+                • <strong>Mr. White:</strong> <strong>+4 points</strong> for surviving or guessing the secret word.
+              </p>
+              <p className="text-[#EDE6D6]/50 pt-0.5">
+                Points accumulate across games in the Session Scoreboard!
+              </p>
+            </div>
           </div>
         </div>
 

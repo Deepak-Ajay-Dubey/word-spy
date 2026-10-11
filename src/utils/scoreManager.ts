@@ -1,6 +1,6 @@
 // Session Scoreboard Manager
 
-const STORAGE_KEY = 'word_spy_session_scores_v1';
+const STORAGE_KEY = 'word_spy_session_scores_v2';
 
 export function getScores(): Record<string, number> {
   try {
@@ -20,27 +20,42 @@ export function saveScores(scores: Record<string, number>): void {
   }
 }
 
+export interface GamePointsRecord {
+  updatedScores: Record<string, number>;
+  pointsEarned: Record<string, number>;
+}
+
 export function recordGamePoints(
-  players: Array<{ name: string; role: 'CIVILIAN' | 'UNDERCOVER' | 'MR_WHITE' }>,
+  players: Array<{ name: string; role: 'CIVILIAN' | 'UNDERCOVER' | 'MR_WHITE'; isEliminated: boolean }>,
   winner: 'CIVILIANS' | 'UNDERCOVERS' | 'MR_WHITE'
-): Record<string, number> {
+): GamePointsRecord {
   const scores = getScores();
+  const pointsEarned: Record<string, number> = {};
 
   players.forEach((player) => {
     const key = player.name.trim();
-    if (!scores[key]) scores[key] = 0;
+    if (scores[key] === undefined) scores[key] = 0;
+    let delta = 0;
 
     if (winner === 'CIVILIANS' && player.role === 'CIVILIAN') {
-      scores[key] += 1;
+      // Only surviving civilians earn +2 points; eliminated civilians earn 0 points
+      if (!player.isEliminated) {
+        delta = 2;
+      } else {
+        delta = 0;
+      }
     } else if (winner === 'UNDERCOVERS' && player.role === 'UNDERCOVER') {
-      scores[key] += 1;
+      delta = 3;
     } else if (winner === 'MR_WHITE' && player.role === 'MR_WHITE') {
-      scores[key] += 1;
+      delta = 4;
     }
+
+    scores[key] += delta;
+    pointsEarned[key] = delta;
   });
 
   saveScores(scores);
-  return scores;
+  return { updatedScores: scores, pointsEarned };
 }
 
 export function resetScores(): void {

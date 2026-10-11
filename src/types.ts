@@ -39,6 +39,7 @@ export interface GameResult {
   category: string;
   players: Player[];
   roundsPlayed: number;
+  pointsEarned?: Record<string, number>;
 }
 
 export interface RoleDistribution {

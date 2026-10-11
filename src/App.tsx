@@ -21,7 +21,7 @@ export default function App() {
   const [rulesOpen, setRulesOpen] = useState<boolean>(false);
   const [scoreboardOpen, setScoreboardOpen] = useState<boolean>(false);
   const [soundOn, setSoundOn] = useState<boolean>(getSoundEnabled());
-  const [selectedCategory, setSelectedCategory] = useState<string>('All Categories');
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(['All Categories']);
 
   // Active game states
   const [playerNames, setPlayerNames] = useState<string[]>([]);
@@ -36,15 +36,15 @@ export default function App() {
 
   // Pre-fetch live AI words if Surprise Me is chosen
   useEffect(() => {
-    prefetchWordBatch(selectedCategory).catch(() => {});
-  }, [selectedCategory]);
+    prefetchWordBatch(selectedCategories).catch(() => {});
+  }, [selectedCategories]);
 
   // Start a fresh game with chosen names
   const handleStartGame = async (names: string[]) => {
     setPlayerNames(names);
 
     try {
-      const pair = await getNextWordPair(selectedCategory);
+      const pair = await getNextWordPair(selectedCategories);
       setCurrentWordPair(pair);
 
       const assignedPlayers = assignRolesAndWords(names, pair);
@@ -73,6 +73,14 @@ export default function App() {
       setRoundTurnOrder(newOrder);
       setRoundNumber(1);
       setPhase('DESCRIBE_TURN');
+    }
+  };
+
+  // Backward step in reveal phase if passed too quickly
+  const handleBackToPrevious = () => {
+    if (currentRevealIndex > 0) {
+      setCurrentRevealIndex((prev) => prev - 1);
+      setPhase('ROLE_REVEAL');
     }
   };
 
@@ -129,10 +137,11 @@ export default function App() {
     );
 
     if (result) {
+      // Record game scores: Surviving Civilian +2, Eliminated Civilian +0, Undercover +3, Mr White +4
+      const { pointsEarned } = recordGamePoints(players, result.winner);
+      result.pointsEarned = pointsEarned;
       setGameResult(result);
       setPhase('GAME_OVER');
-      // Record game scores for winning side (+1 point per player)
-      recordGamePoints(players, result.winner);
     } else {
       // Next round: reshuffle turn order cleanly (with Mr. White never first)
       const nextRound = roundNumber + 1;
@@ -145,7 +154,7 @@ export default function App() {
     }
   };
 
-  // Play again with same players (points persist across games)
+  // Play again with same players (points persist across games, next fresh word pair)
   const handlePlayAgainSamePlayers = () => {
     if (playerNames.length >= 3) {
       handleStartGame(playerNames);
@@ -182,8 +191,8 @@ export default function App() {
             <HomeScreen
               onStartNewGame={() => setPhase('SETUP')}
               onOpenRules={() => setRulesOpen(true)}
-              selectedCategory={selectedCategory}
-              setSelectedCategory={setSelectedCategory}
+              selectedCategories={selectedCategories}
+              setSelectedCategories={setSelectedCategories}
             />
           )}
 
@@ -200,6 +209,7 @@ export default function App() {
               playerIndex={currentRevealIndex}
               totalPlayers={players.length}
               onProceed={() => setPhase('ROLE_REVEAL')}
+              onBackToPrevious={currentRevealIndex > 0 ? handleBackToPrevious : undefined}
             />
           )}
 
@@ -209,6 +219,7 @@ export default function App() {
               playerIndex={currentRevealIndex}
               totalPlayers={players.length}
               onDoneReveal={handleDoneReveal}
+              onBackToPrevious={currentRevealIndex > 0 ? handleBackToPrevious : undefined}
             />
           )}
 

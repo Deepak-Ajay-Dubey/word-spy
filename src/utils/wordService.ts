@@ -2,10 +2,35 @@ import { WordPair } from '../types';
 import { FALLBACK_WORD_PAIRS } from '../data/fallbackWords';
 import { shuffleArray } from './gameLogic';
 
+const STORAGE_KEY = 'word_spy_used_words_v2';
+
 let curatedPool: WordPair[] = [];
-let usedPairsSet: Set<string> = new Set();
 let cachedAIPairs: WordPair[] = [];
 let isFetchingBatch = false;
+
+// Load persisted used pairs from localStorage
+function getUsedPairsSet(): Set<string> {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr)) {
+        return new Set(arr);
+      }
+    }
+  } catch {
+    // Ignore storage errors
+  }
+  return new Set();
+}
+
+function saveUsedPairsSet(set: Set<string>) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(set)));
+  } catch {
+    // Ignore storage errors
+  }
+}
 
 // Initialize and shuffle full curated pool
 function initCuratedPool() {
@@ -13,18 +38,20 @@ function initCuratedPool() {
 }
 
 // Prefetch AI only if selected
-export async function prefetchWordBatch(category?: string) {
-  if (category !== 'Surprise Me (AI Live)' || isFetchingBatch) return;
+export async function prefetchWordBatch(categories?: string | string[]) {
+  const cats = Array.isArray(categories) ? categories : [categories || 'All Categories'];
+  if (!cats.includes('Surprise Me (AI Live)') || isFetchingBatch) return;
   isFetchingBatch = true;
 
   try {
+    const used = getUsedPairsSet();
     const res = await fetch('/api/words/generate-batch', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         category: 'Surprise Me',
         count: 15,
-        exclude: Array.from(usedPairsSet),
+        exclude: Array.from(used),
       }),
     });
 
@@ -41,17 +68,32 @@ export async function prefetchWordBatch(category?: string) {
   }
 }
 
-export async function getNextWordPair(selectedCategory?: string): Promise<WordPair> {
-  const cat = selectedCategory || 'All Categories';
+function matchesCategory(pairCategory: string, selectedCats: string[]): boolean {
+  if (selectedCats.length === 0 || selectedCats.includes('All Categories')) {
+    return true;
+  }
+  return selectedCats.some((c) =>
+    pairCategory.toLowerCase().includes(c.toLowerCase()) ||
+    c.toLowerCase().includes(pairCategory.toLowerCase())
+  );
+}
+
+export async function getNextWordPair(selectedCategories?: string | string[]): Promise<WordPair> {
+  const activeCats = Array.isArray(selectedCategories)
+    ? selectedCategories.length > 0 ? selectedCategories : ['All Categories']
+    : [selectedCategories || 'All Categories'];
+
+  const usedPairsSet = getUsedPairsSet();
 
   // 1. If user explicitly requested AI generation
-  if (cat === 'Surprise Me (AI Live)') {
+  if (activeCats.includes('Surprise Me (AI Live)')) {
     if (cachedAIPairs.length > 0) {
       const pair = cachedAIPairs.shift()!;
-      usedPairsSet.add(`${pair.civilian.toLowerCase()}_${pair.undercover.toLowerCase()}`);
+      const key = `${pair.civilian.toLowerCase()}_${pair.undercover.toLowerCase()}`;
+      usedPairsSet.add(key);
+      saveUsedPairsSet(usedPairsSet);
       return pair;
     }
-    // Attempt one quick fetch
     try {
       const res = await fetch('/api/words/generate-batch', {
         method: 'POST',
@@ -62,6 +104,9 @@ export async function getNextWordPair(selectedCategory?: string): Promise<WordPa
         const data = await res.json();
         if (data?.pairs?.length > 0) {
           const pair = data.pairs[0];
+          const key = `${pair.civilian.toLowerCase()}_${pair.undercover.toLowerCase()}`;
+          usedPairsSet.add(key);
+          saveUsedPairsSet(usedPairsSet);
           return pair;
         }
       }
@@ -75,28 +120,41 @@ export async function getNextWordPair(selectedCategory?: string): Promise<WordPa
     initCuratedPool();
   }
 
-  // Find candidate in curated pool
+  // Find candidate in curated pool matching category filter and NOT used yet
   let candidateIndex = curatedPool.findIndex((p) => {
     const key = `${p.civilian.toLowerCase()}_${p.undercover.toLowerCase()}`;
     const notUsed = !usedPairsSet.has(key);
-    if (cat === 'All Categories' || cat === 'Surprise Me (AI Live)') return notUsed;
-    return notUsed && p.category.toLowerCase().includes(cat.toLowerCase());
+    return notUsed && matchesCategory(p.category, activeCats);
   });
 
-  // If filtered category or entire pool was exhausted, reset the used set for continuous play
+  // If all matching words were used, clear the used set for these categories to recycle fresh games
   if (candidateIndex === -1) {
-    usedPairsSet.clear();
-    initCuratedPool();
-    candidateIndex = curatedPool.findIndex((p) => {
-      if (cat === 'All Categories' || cat === 'Surprise Me (AI Live)') return true;
-      return p.category.toLowerCase().includes(cat.toLowerCase());
+    // Filter out used keys that match these categories to allow fresh replay
+    FALLBACK_WORD_PAIRS.forEach((p) => {
+      if (matchesCategory(p.category, activeCats)) {
+        usedPairsSet.delete(`${p.civilian.toLowerCase()}_${p.undercover.toLowerCase()}`);
+      }
     });
+    saveUsedPairsSet(usedPairsSet);
+    initCuratedPool();
+
+    candidateIndex = curatedPool.findIndex((p) => {
+      const key = `${p.civilian.toLowerCase()}_${p.undercover.toLowerCase()}`;
+      return !usedPairsSet.has(key) && matchesCategory(p.category, activeCats);
+    });
+  }
+
+  // If still not found, search without used restriction
+  if (candidateIndex === -1) {
+    candidateIndex = curatedPool.findIndex((p) => matchesCategory(p.category, activeCats));
   }
 
   if (candidateIndex !== -1) {
     const pair = curatedPool[candidateIndex];
     curatedPool.splice(candidateIndex, 1);
-    usedPairsSet.add(`${pair.civilian.toLowerCase()}_${pair.undercover.toLowerCase()}`);
+    const key = `${pair.civilian.toLowerCase()}_${pair.undercover.toLowerCase()}`;
+    usedPairsSet.add(key);
+    saveUsedPairsSet(usedPairsSet);
     return pair;
   }
 
@@ -106,6 +164,10 @@ export async function getNextWordPair(selectedCategory?: string): Promise<WordPa
 }
 
 export function resetUsedWords() {
-  usedPairsSet.clear();
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // Ignore
+  }
   initCuratedPool();
 }
