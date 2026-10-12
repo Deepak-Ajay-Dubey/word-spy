@@ -3,6 +3,7 @@ import { GamePhase, Player, WordPair, GameResult } from './types';
 import { Header } from './components/Header';
 import { HowToPlayModal } from './components/HowToPlayModal';
 import { ScoreboardModal } from './components/ScoreboardModal';
+import { HistoryModal } from './components/HistoryModal';
 import { HomeScreen } from './components/HomeScreen';
 import { PlayerSetup } from './components/PlayerSetup';
 import { PassPhoneScreen } from './components/PassPhoneScreen';
@@ -15,11 +16,13 @@ import { getSoundEnabled } from './utils/audio';
 import { assignRolesAndWords, checkWinCondition, generateRoundTurnOrder } from './utils/gameLogic';
 import { getNextWordPair, prefetchWordBatch } from './utils/wordService';
 import { recordGamePoints } from './utils/scoreManager';
+import { saveMatchRecord } from './utils/historyManager';
 
 export default function App() {
   const [phase, setPhase] = useState<GamePhase>('HOME');
   const [rulesOpen, setRulesOpen] = useState<boolean>(false);
   const [scoreboardOpen, setScoreboardOpen] = useState<boolean>(false);
+  const [historyOpen, setHistoryOpen] = useState<boolean>(false);
   const [soundOn, setSoundOn] = useState<boolean>(getSoundEnabled());
   const [selectedCategories, setSelectedCategories] = useState<string[]>(['All Categories']);
 
@@ -140,6 +143,26 @@ export default function App() {
       // Record game scores: Surviving Civilian +2, Eliminated Civilian +0, Undercover +3, Mr White +4
       const { pointsEarned } = recordGamePoints(players, result.winner);
       result.pointsEarned = pointsEarned;
+
+      // Automatically log completed match to device history
+      saveMatchRecord({
+        id: `match_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+        timestamp: Date.now(),
+        roundsPlayed: roundNumber,
+        winner: result.winner,
+        winnerTitle: result.title,
+        civilianWord: result.civilianWord,
+        undercoverWord: result.undercoverWord,
+        category: result.category,
+        players: players.map((p) => ({
+          name: p.name,
+          role: p.role,
+          isEliminated: p.isEliminated,
+          eliminatedRound: p.eliminatedRound,
+          pointsEarned: pointsEarned[p.name.trim()] || 0,
+        })),
+      });
+
       setGameResult(result);
       setPhase('GAME_OVER');
     } else {
@@ -174,12 +197,13 @@ export default function App() {
   return (
     <div className="min-h-screen w-full bg-[#1B2430] text-[#EDE6D6] font-sans flex flex-col items-center justify-center p-0 sm:p-4 selection:bg-[#B08D57] selection:text-[#1B2430]">
       {/* Phone container */}
-      <div className="w-full max-w-md min-h-screen sm:min-h-[760px] sm:h-[820px] bg-[#161E28] sm:rounded-3xl sm:border sm:border-[#2C3848] shadow-2xl flex flex-col justify-between overflow-hidden relative">
+      <div className="w-full max-w-md sm:max-w-lg min-h-screen sm:min-h-[760px] sm:h-[830px] bg-[#161E28] sm:rounded-3xl sm:border sm:border-[#2C3848] shadow-2xl flex flex-col justify-between overflow-hidden relative">
         {/* App Header */}
         <Header
           phase={phase}
           onOpenRules={() => setRulesOpen(true)}
           onOpenScoreboard={() => setScoreboardOpen(true)}
+          onOpenHistory={() => setHistoryOpen(true)}
           onRestart={handleRestart}
           soundOn={soundOn}
           setSoundOn={setSoundOn}
@@ -254,6 +278,7 @@ export default function App() {
               onPlayAgain={handlePlayAgainSamePlayers}
               onGoHome={handleRestart}
               onOpenScoreboard={() => setScoreboardOpen(true)}
+              onOpenHistory={() => setHistoryOpen(true)}
             />
           )}
         </main>
@@ -269,6 +294,12 @@ export default function App() {
       <ScoreboardModal
         isOpen={scoreboardOpen}
         onClose={() => setScoreboardOpen(false)}
+      />
+
+      {/* History & Match Analytics Modal */}
+      <HistoryModal
+        isOpen={historyOpen}
+        onClose={() => setHistoryOpen(false)}
       />
     </div>
   );

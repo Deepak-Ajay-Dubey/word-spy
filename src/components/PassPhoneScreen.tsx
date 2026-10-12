@@ -1,6 +1,7 @@
 import { ArrowRight, ArrowLeft, Shield } from 'lucide-react';
 import { playClick } from '../utils/audio';
 import { Player } from '../types';
+import { getNameSizeClass } from '../utils/textFit';
 
 interface PassPhoneScreenProps {
   player: Player;
@@ -17,10 +18,12 @@ export function PassPhoneScreen({
   onProceed,
   onBackToPrevious,
 }: PassPhoneScreenProps) {
+  const nameSizeClass = getNameSizeClass(player.name);
+
   return (
     <div
       id="pass-phone-screen"
-      className="flex flex-col items-center justify-between min-h-[calc(100vh-68px)] max-w-sm mx-auto px-4 py-8 text-center space-y-6 select-none"
+      className="flex flex-col items-center justify-between min-h-[calc(100vh-68px)] w-full max-w-md sm:max-w-lg mx-auto px-3 sm:px-6 py-6 sm:py-8 text-center space-y-6 select-none"
     >
       {/* Top Header */}
       <div className="w-full flex items-center justify-between text-xs text-[#EDE6D6]/50">
@@ -44,17 +47,18 @@ export function PassPhoneScreen({
       </div>
 
       {/* Center Card */}
-      <div className="w-full my-auto bg-[#161E28] border border-[#2C3848] rounded-2xl p-7 shadow-sm space-y-5 text-center">
+      <div className="w-full my-auto bg-[#161E28] border border-[#2C3848] rounded-2xl p-6 sm:p-7 shadow-sm space-y-5 text-center">
         <div className="w-14 h-14 mx-auto rounded-2xl bg-[#243040] flex items-center justify-center text-[#EDE6D6]/80 shadow-inner">
           <Shield className="w-7 h-7 text-[#B08D57]" />
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-2 w-full">
           <p className="text-xs text-[#EDE6D6]/60 uppercase tracking-wider font-medium">
             Hand device to
           </p>
-          <div className="py-2 px-3 bg-[#1B2430] rounded-xl border border-[#2C3848] max-w-full overflow-hidden">
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#EDE6D6] truncate">
+          {/* Strictly Contained Unbroken Name Display */}
+          <div className="py-2.5 px-3 bg-[#1B2430] rounded-xl border border-[#2C3848] w-full flex items-center justify-center min-h-[56px] overflow-hidden">
+            <h2 className={`${nameSizeClass} font-bold text-[#EDE6D6] whitespace-nowrap text-center tracking-normal leading-tight max-w-full overflow-hidden text-ellipsis`}>
               {player.name}
             </h2>
           </div>

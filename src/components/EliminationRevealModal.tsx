@@ -41,7 +41,7 @@ export function EliminationRevealModal({
             <p className="text-[11px] uppercase font-semibold text-[#EDE6D6]/50 tracking-wider">
               Operative Removed
             </p>
-            <h3 className="text-2xl font-bold text-[#EDE6D6]">
+            <h3 className={`${eliminatedPlayer.name.length > 8 ? 'text-xl' : 'text-2xl'} font-bold text-[#EDE6D6] whitespace-nowrap text-center truncate max-w-full px-2`}>
               {eliminatedPlayer.name}
             </h3>
           </div>

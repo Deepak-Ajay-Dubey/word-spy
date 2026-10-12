@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Mic, ArrowRight, Eye, EyeOff, X, ShieldAlert } from 'lucide-react';
 import { playTick, playClick } from '../utils/audio';
 import { Player } from '../types';
+import { getNameSizeClass, getWordSizeClass } from '../utils/textFit';
 
 interface DescribeRoundScreenProps {
   roundNumber: number;
@@ -22,10 +23,14 @@ export function DescribeRoundScreen({
   const currentSpeaker = turnOrder[currentSpeakerIndex];
   const isLastSpeaker = currentSpeakerIndex === turnOrder.length - 1;
 
+  const speakerNameClass = getNameSizeClass(currentSpeaker?.name || '');
+
   // Active player to peek
   const peekPlayer =
     turnOrder.find((p) => p.id === (selectedPeekPlayerId || currentSpeaker?.id)) ||
     currentSpeaker;
+
+  const peekWordClass = getWordSizeClass(peekPlayer?.word || '');
 
   const handleNextSpeaker = () => {
     playTick();
@@ -59,17 +64,17 @@ export function DescribeRoundScreen({
       </div>
 
       {/* Active Speaker Card */}
-      <div className="w-full my-auto bg-[#161E28] border border-[#2C3848] rounded-2xl p-7 shadow-sm space-y-5 text-center relative overflow-hidden">
+      <div className="w-full my-auto bg-[#161E28] border border-[#2C3848] rounded-2xl p-6 sm:p-7 shadow-sm space-y-5 text-center relative overflow-hidden">
         <div className="w-14 h-14 mx-auto rounded-2xl bg-[#243040] flex items-center justify-center text-[#B08D57] shadow-inner">
           <Mic className="w-7 h-7" />
         </div>
 
-        <div className="space-y-1.5 max-w-full px-2">
+        <div className="space-y-1.5 w-full px-1">
           <p className="text-xs text-[#EDE6D6]/60 uppercase tracking-wider font-medium">
             Current turn to speak
           </p>
-          <div className="py-2 px-3 bg-[#1B2430] rounded-xl border border-[#2C3848] max-w-full overflow-hidden">
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#EDE6D6] truncate">
+          <div className="py-2.5 px-3 bg-[#1B2430] rounded-xl border border-[#2C3848] w-full flex items-center justify-center min-h-[56px] overflow-hidden">
+            <h2 className={`${speakerNameClass} font-bold text-[#EDE6D6] whitespace-nowrap text-center tracking-normal leading-tight max-w-full overflow-hidden text-ellipsis`}>
               {currentSpeaker?.name}
             </h2>
           </div>
@@ -84,7 +89,7 @@ export function DescribeRoundScreen({
             id="peek-my-word-btn"
             type="button"
             onClick={handleOpenPeek}
-            className="py-2 px-3.5 rounded-xl bg-[#243040]/70 hover:bg-[#243040] border border-[#2C3848] text-xs text-[#EDE6D6]/80 hover:text-[#EDE6D6] flex items-center justify-center gap-1.5 mx-auto transition-colors cursor-pointer min-h-[40px]"
+            className="py-2.5 px-3.5 rounded-xl bg-[#243040]/70 hover:bg-[#243040] border border-[#2C3848] text-xs text-[#EDE6D6]/80 hover:text-[#EDE6D6] flex items-center justify-center gap-1.5 mx-auto transition-colors cursor-pointer min-h-[44px]"
           >
             <Eye className="w-3.5 h-3.5 text-[#B08D57]" />
             <span>Forgot your word? Peek privately</span>
@@ -99,7 +104,7 @@ export function DescribeRoundScreen({
           {turnOrder.map((player, idx) => (
             <span
               key={player.id}
-              className={`px-2.5 py-1 rounded-lg text-xs transition-colors ${
+              className={`px-2.5 py-1 rounded-lg text-xs transition-colors whitespace-nowrap ${
                 idx === currentSpeakerIndex
                   ? 'bg-[#B08D57] text-[#1B2430] font-semibold'
                   : idx < currentSpeakerIndex
@@ -156,7 +161,7 @@ export function DescribeRoundScreen({
                   setSelectedPeekPlayerId(e.target.value);
                   setIsHoldingPeek(false);
                 }}
-                className="w-full py-2 px-3 rounded-lg bg-[#1B2430] border border-[#2C3848] text-xs text-[#EDE6D6] focus:outline-none focus:border-[#B08D57]"
+                className="w-full py-2.5 px-3 rounded-lg bg-[#1B2430] border border-[#2C3848] text-xs text-[#EDE6D6] focus:outline-none focus:border-[#B08D57] min-h-[44px]"
               >
                 {turnOrder.map((p) => (
                   <option key={p.id} value={p.id}>
@@ -179,8 +184,8 @@ export function DescribeRoundScreen({
                     </p>
                   </div>
                 ) : (
-                  <div className="w-full max-w-full px-2 py-3 bg-[#FAF7F0] rounded-xl border border-[#D6CCA9] overflow-hidden flex items-center justify-center">
-                    <span className="font-typewriter text-xl sm:text-2xl font-bold text-[#1B2430] uppercase tracking-wider break-words line-clamp-2 text-center max-w-full">
+                  <div className="w-full px-2 py-3.5 bg-[#FAF7F0] rounded-xl border border-[#D6CCA9] overflow-hidden flex items-center justify-center min-h-[64px]">
+                    <span className={`font-typewriter ${peekWordClass} font-bold text-[#1B2430] uppercase tracking-wide text-center max-w-full leading-tight`}>
                       {peekPlayer.word}
                     </span>
                   </div>
@@ -229,7 +234,7 @@ export function DescribeRoundScreen({
                   playClick();
                   setPeekModalOpen(false);
                 }}
-                className="w-full py-2 rounded-lg text-xs text-[#EDE6D6]/60 hover:text-[#EDE6D6] cursor-pointer"
+                className="w-full py-2.5 rounded-lg text-xs text-[#EDE6D6]/60 hover:text-[#EDE6D6] cursor-pointer min-h-[40px]"
               >
                 Done Peeking
               </button>

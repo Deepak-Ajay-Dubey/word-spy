@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Volume2, VolumeX, HelpCircle, RotateCcw, Trophy } from 'lucide-react';
+import { Volume2, VolumeX, HelpCircle, RotateCcw, Trophy, History } from 'lucide-react';
 import { getSoundEnabled, setSoundEnabled, playClick } from '../utils/audio';
 import { GamePhase } from '../types';
 
@@ -7,6 +7,7 @@ interface HeaderProps {
   phase: GamePhase;
   onOpenRules: () => void;
   onOpenScoreboard: () => void;
+  onOpenHistory: () => void;
   onRestart: () => void;
   soundOn: boolean;
   setSoundOn: (val: boolean) => void;
@@ -16,6 +17,7 @@ export function Header({
   phase,
   onOpenRules,
   onOpenScoreboard,
+  onOpenHistory,
   onRestart,
   soundOn,
   setSoundOn,
@@ -58,6 +60,20 @@ export function Header({
         </div>
 
         <div id="header-actions" className="flex items-center gap-1">
+          {/* Game History & Records Button */}
+          <button
+            id="header-history-btn"
+            type="button"
+            onClick={() => {
+              playClick();
+              onOpenHistory();
+            }}
+            className="p-2 rounded-lg text-[#EDE6D6]/70 hover:text-[#EDE6D6] hover:bg-[#243040] transition-colors"
+            title="Match History & Records"
+          >
+            <History className="w-4 h-4" />
+          </button>
+
           {/* Scoreboard Button */}
           <button
             id="header-scoreboard-btn"

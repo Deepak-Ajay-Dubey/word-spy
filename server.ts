@@ -157,6 +157,9 @@ CRITICAL RULES for word pairs:
     }
   });
 
+  // Serve public static assets
+  app.use(express.static(path.join(process.cwd(), "public")));
+
   // Vite middleware in dev or static server in prod
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({

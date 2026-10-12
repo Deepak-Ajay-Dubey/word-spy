@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { UserX, Scale } from 'lucide-react';
 import { playClick, playEliminationImpact } from '../utils/audio';
 import { Player } from '../types';
+import { getNameSizeClass } from '../utils/textFit';
 
 interface VotingScreenProps {
   roundNumber: number;
@@ -21,6 +22,8 @@ export function VotingScreen({
   const [selectedTarget, setSelectedTarget] = useState<Player | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
   const [showTiedModal, setShowTiedModal] = useState<boolean>(false);
+
+  const voterNameClass = getNameSizeClass(designatedVoter.name);
 
   const handleSelect = (player: Player) => {
     playClick();
@@ -44,7 +47,7 @@ export function VotingScreen({
   return (
     <div
       id="voting-screen"
-      className="flex flex-col items-center justify-between min-h-[calc(100vh-68px)] max-w-sm mx-auto px-4 py-6 space-y-6"
+      className="flex flex-col items-center justify-between min-h-[calc(100vh-68px)] max-w-sm mx-auto px-4 py-6 space-y-6 select-none"
     >
       {/* Top Banner */}
       <div className="w-full flex items-center justify-between text-xs text-[#EDE6D6]/50">
@@ -53,11 +56,13 @@ export function VotingScreen({
       </div>
 
       {/* Designated Voter Banner */}
-      <div className="w-full bg-[#161E28] rounded-2xl p-5 border border-[#2C3848] text-center space-y-1 shadow-sm">
-        <p className="text-xs text-[#EDE6D6]/60">Casting vote for group:</p>
-        <h2 className="text-xl font-bold text-[#EDE6D6]">
-          {designatedVoter.name}
-        </h2>
+      <div className="w-full bg-[#161E28] rounded-2xl p-5 border border-[#2C3848] text-center space-y-1.5 shadow-sm">
+        <p className="text-xs text-[#EDE6D6]/60 uppercase tracking-wider font-medium">Casting vote for group:</p>
+        <div className="py-1.5 px-3 bg-[#1B2430] rounded-xl border border-[#2C3848] max-w-full overflow-hidden flex items-center justify-center min-h-[46px]">
+          <h2 className={`${voterNameClass} font-bold text-[#EDE6D6] whitespace-nowrap text-center leading-tight truncate`}>
+            {designatedVoter.name}
+          </h2>
+        </div>
         <p className="text-xs text-[#EDE6D6]/50 pt-1">
           Discuss together, then select the player to eliminate.
         </p>
@@ -76,13 +81,16 @@ export function VotingScreen({
               id={`vote-player-${player.id}`}
               type="button"
               onClick={() => handleSelect(player)}
-              className="p-3.5 rounded-xl bg-[#161E28] hover:bg-[#1E2836] border border-[#2C3848] hover:border-[#B3261E]/60 active:scale-[0.98] transition-all text-left flex flex-col justify-between gap-3 cursor-pointer shadow-sm"
+              className="p-3.5 rounded-xl bg-[#161E28] hover:bg-[#1E2836] border border-[#2C3848] hover:border-[#B3261E]/60 active:scale-[0.98] transition-all text-left flex flex-col justify-between gap-3 cursor-pointer shadow-sm min-h-[82px]"
             >
-              <div className="space-y-0.5">
-                <span className="text-xs text-[#EDE6D6]/40 font-mono">
+              <div className="space-y-0.5 w-full overflow-hidden">
+                <span className="text-[11px] text-[#EDE6D6]/40 font-mono block">
                   #{player.id.slice(-2) || '01'}
                 </span>
-                <div className="text-sm font-semibold text-[#EDE6D6] truncate">
+                <div
+                  className="text-xs sm:text-sm font-semibold text-[#EDE6D6] whitespace-nowrap overflow-hidden text-ellipsis block w-full"
+                  title={player.name}
+                >
                   {player.name}
                 </div>
               </div>
@@ -104,7 +112,7 @@ export function VotingScreen({
             playClick();
             setShowTiedModal(true);
           }}
-          className="w-full py-2.5 px-3 rounded-xl bg-transparent hover:bg-[#161E28] text-[#EDE6D6]/60 hover:text-[#EDE6D6] text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+          className="w-full py-2.5 px-3 rounded-xl bg-transparent hover:bg-[#161E28] text-[#EDE6D6]/60 hover:text-[#EDE6D6] text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer min-h-[44px]"
         >
           <Scale className="w-3.5 h-3.5" />
           <span>Tied Vote / Skip Round</span>
@@ -119,10 +127,10 @@ export function VotingScreen({
         >
           <div className="w-full max-w-sm bg-[#161E28] border border-[#2C3848] rounded-2xl p-6 shadow-2xl space-y-4 text-center text-[#EDE6D6]">
             <div className="space-y-1.5">
-              <h3 className="text-lg font-bold text-[#EDE6D6]">
+              <h3 className="text-base font-bold text-[#EDE6D6] whitespace-nowrap overflow-hidden text-ellipsis px-2">
                 Eliminate {selectedTarget.name}?
               </h3>
-              <p className="text-xs text-[#EDE6D6]/60">
+              <p className="text-xs text-[#EDE6D6]/60 leading-relaxed">
                 They will be removed from remaining turns and votes. Their role remains classified until game over.
               </p>
             </div>
@@ -135,7 +143,7 @@ export function VotingScreen({
                   playClick();
                   setShowConfirmModal(false);
                 }}
-                className="flex-1 py-2.5 px-3 rounded-xl text-xs font-medium text-[#EDE6D6]/80 bg-[#243040] hover:bg-[#2C3848] transition-colors cursor-pointer"
+                className="flex-1 py-2.5 px-3 rounded-xl text-xs font-medium text-[#EDE6D6]/80 bg-[#243040] hover:bg-[#2C3848] transition-colors cursor-pointer min-h-[44px]"
               >
                 Cancel
               </button>
@@ -143,7 +151,7 @@ export function VotingScreen({
                 id="execute-elimination-btn"
                 type="button"
                 onClick={handleConfirmElimination}
-                className="flex-1 py-2.5 px-3 rounded-xl text-xs font-semibold text-white bg-[#B3261E] hover:bg-[#9B1E17] transition-colors cursor-pointer"
+                className="flex-1 py-2.5 px-3 rounded-xl text-xs font-semibold text-white bg-[#B3261E] hover:bg-[#9B1E17] transition-colors cursor-pointer min-h-[44px]"
               >
                 Eliminate
               </button>
@@ -161,31 +169,32 @@ export function VotingScreen({
           <div className="w-full max-w-sm bg-[#161E28] border border-[#2C3848] rounded-2xl p-6 shadow-2xl space-y-4 text-center text-[#EDE6D6]">
             <div className="space-y-1.5">
               <h3 className="text-base font-bold text-[#EDE6D6]">
-                Declare a Tied Vote?
+                Tied Vote or Skip Round?
               </h3>
-              <p className="text-xs text-[#EDE6D6]/60">
-                Nobody will be eliminated. Play will continue with another round of clues.
+              <p className="text-xs text-[#EDE6D6]/60 leading-relaxed">
+                If the group cannot agree on who to eliminate, skip to the next clue round. No one will be eliminated this round.
               </p>
             </div>
 
             <div className="flex items-center gap-2 pt-2">
               <button
+                id="cancel-tied-btn"
                 type="button"
                 onClick={() => {
                   playClick();
                   setShowTiedModal(false);
                 }}
-                className="flex-1 py-2.5 px-3 rounded-xl text-xs font-medium text-[#EDE6D6]/80 bg-[#243040] hover:bg-[#2C3848] transition-colors cursor-pointer"
+                className="flex-1 py-2.5 px-3 rounded-xl text-xs font-medium text-[#EDE6D6]/80 bg-[#243040] hover:bg-[#2C3848] transition-colors cursor-pointer min-h-[44px]"
               >
-                Cancel
+                Back to Vote
               </button>
               <button
-                id="confirm-skip-round-btn"
+                id="confirm-tied-skip-btn"
                 type="button"
                 onClick={handleConfirmTiedVote}
-                className="flex-1 py-2.5 px-3 rounded-xl text-xs font-semibold text-[#1B2430] bg-[#B08D57] hover:bg-[#C29D64] transition-colors cursor-pointer"
+                className="flex-1 py-2.5 px-3 rounded-xl text-xs font-semibold text-[#1B2430] bg-[#B08D57] hover:bg-[#C29D64] transition-colors cursor-pointer min-h-[44px]"
               >
-                Next Round
+                Skip Round
               </button>
             </div>
           </div>

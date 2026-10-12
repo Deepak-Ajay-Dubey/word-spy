@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { ArrowRight, ArrowLeft, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Eye, EyeOff, AlertCircle, Shield } from 'lucide-react';
 import { playCardFlip, playClick, playTick } from '../utils/audio';
 import { Player } from '../types';
+import { getNameSizeClass, getWordSizeClass } from '../utils/textFit';
 
 interface RoleRevealScreenProps {
   player: Player;
@@ -22,6 +23,9 @@ export function RoleRevealScreen({
   const [countdown, setCountdown] = useState<number>(5);
   const isMrWhite = player.role === 'MR_WHITE';
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const nameSizeClass = getNameSizeClass(player.name);
+  const wordSizeClass = getWordSizeClass(player.word);
 
   // UNIFORM AUDIO FOR ALL ROLES: identical soft card flip sound
   const handleFlip = () => {
@@ -64,10 +68,10 @@ export function RoleRevealScreen({
   return (
     <div
       id="role-reveal-screen"
-      className="flex flex-col items-center justify-between min-h-[calc(100vh-68px)] max-w-sm mx-auto px-4 py-8 text-center select-none space-y-6"
+      className="flex flex-col items-center justify-between min-h-[calc(100vh-68px)] w-full max-w-md sm:max-w-lg mx-auto px-3 sm:px-6 py-6 sm:py-8 text-center select-none space-y-6"
     >
       {/* Top Header */}
-      <div className="w-full flex items-center justify-between text-xs text-[#EDE6D6]/50">
+      <div className="w-full flex items-center justify-between text-xs text-[#EDE6D6]/50 px-1">
         <div className="flex items-center gap-1">
           {playerIndex > 0 && onBackToPrevious && (
             <button
@@ -88,29 +92,31 @@ export function RoleRevealScreen({
         <span>{playerIndex + 1} of {totalPlayers}</span>
       </div>
 
-      {/* Flip Card Container */}
+      {/* Expanded Flip Card Container (Full Horizontal Utilization) */}
       <div className="w-full my-auto perspective-1000 min-h-[350px] flex items-center justify-center">
         <div
           id="reveal-card"
           onClick={!isFlipped ? handleFlip : undefined}
-          className={`w-full h-full min-h-[350px] relative transition-transform duration-500 transform-style-3d cursor-pointer rounded-2xl ${
+          className={`w-full h-full min-h-[350px] relative transition-transform duration-500 transform-style-3d cursor-pointer rounded-3xl ${
             isFlipped ? 'rotate-y-180' : 'hover:scale-[1.01]'
           }`}
         >
           {/* FRONT (Tap to Reveal) */}
           <div
             id="card-front"
-            className="absolute inset-0 backface-hidden w-full h-full p-6 sm:p-8 rounded-2xl bg-[#161E28] border border-[#2C3848] shadow-sm flex flex-col items-center justify-between"
+            className="absolute inset-0 backface-hidden w-full h-full p-5 sm:p-7 rounded-3xl bg-[#161E28] border border-[#2C3848] shadow-sm flex flex-col items-center justify-between"
           >
             <div className="text-xs text-[#EDE6D6]/40 uppercase tracking-wider font-mono">
               CONFIDENTIAL
             </div>
 
-            <div className="space-y-2 max-w-full px-2">
+            <div className="space-y-2 w-full px-2">
               <p className="text-xs text-[#EDE6D6]/60">Secret identity for</p>
-              <h2 className="text-2xl sm:text-3xl font-bold text-[#EDE6D6] truncate">
-                {player.name}
-              </h2>
+              <div className="w-full flex items-center justify-center min-h-[44px]">
+                <h2 className={`${nameSizeClass} font-bold text-[#EDE6D6] whitespace-nowrap text-center tracking-normal leading-tight max-w-full overflow-hidden text-ellipsis`}>
+                  {player.name}
+                </h2>
+              </div>
             </div>
 
             <div className="w-full py-3.5 px-4 rounded-xl bg-[#243040] text-xs font-medium text-[#EDE6D6] flex items-center justify-center gap-2 min-h-[44px]">
@@ -119,13 +125,13 @@ export function RoleRevealScreen({
             </div>
           </div>
 
-          {/* BACK (Word Revealed - Contained strictly within boundaries) */}
+          {/* BACK (Word Revealed - WIDE, UNBROKEN SINGLE-LINE CONTAINER) */}
           <div
             id="card-back"
-            className="absolute inset-0 backface-hidden rotate-y-180 w-full h-full p-6 sm:p-7 rounded-2xl bg-[#FAF7F0] text-[#1B2430] border border-[#D6CCA9] shadow-md flex flex-col items-center justify-between overflow-hidden"
+            className="absolute inset-0 backface-hidden rotate-y-180 w-full h-full px-4 py-5 sm:px-6 sm:py-6 rounded-3xl bg-[#FAF7F0] text-[#1B2430] border border-[#D6CCA9] shadow-md flex flex-col items-center justify-between overflow-hidden"
           >
             <div className="w-full flex items-center justify-between text-xs text-[#1B2430]/60">
-              <span className="font-semibold truncate max-w-[140px]">{player.name}</span>
+              <span className="font-semibold whitespace-nowrap truncate max-w-[170px]">{player.name}</span>
               <button
                 type="button"
                 onClick={(e) => {
@@ -141,28 +147,33 @@ export function RoleRevealScreen({
             </div>
 
             {isMrWhite ? (
-              <div className="space-y-3 my-auto max-w-full px-2">
+              <div className="space-y-3 my-auto w-full px-2">
                 <div className="w-10 h-10 mx-auto rounded-full bg-[#B3261E]/10 flex items-center justify-center text-[#B3261E]">
                   <AlertCircle className="w-6 h-6" />
                 </div>
                 <div className="font-typewriter text-2xl font-bold text-[#B3261E] uppercase tracking-wider">
                   MR. WHITE
                 </div>
-                <div className="p-3 bg-[#EDE6D6] rounded-xl border border-[#D6CCA9] max-w-full">
+                <div className="p-3 bg-[#EDE6D6] rounded-xl border border-[#D6CCA9] w-full">
                   <p className="text-xs text-[#1B2430]/80 font-medium leading-relaxed">
                     You have NO word. Listen carefully and bluff your way through the clues!
                   </p>
                 </div>
               </div>
             ) : (
-              <div className="space-y-2.5 my-auto w-full max-w-full px-1">
-                <p className="text-[11px] text-[#1B2430]/60 uppercase tracking-wider font-semibold">
-                  Your Secret Word
-                </p>
+              <div className="space-y-3 my-auto w-full px-1 sm:px-2">
+                <div className="flex items-center justify-center gap-1.5 text-[11px] text-[#1B2430]/60 uppercase tracking-widest font-semibold">
+                  <Shield className="w-3.5 h-3.5 text-[#B08D57]" />
+                  <span>Your Secret Word</span>
+                </div>
 
-                {/* STRICTLY CONTAINED AND FITTED WORD BOX */}
-                <div className="w-full py-4 px-3 bg-[#EDE6D6] rounded-xl border border-[#D6CCA9] flex items-center justify-center min-h-[72px] max-h-[110px] overflow-hidden">
-                  <span className="font-typewriter text-xl sm:text-2xl font-bold text-[#1B2430] uppercase tracking-wider break-words line-clamp-2 text-center max-w-full">
+                {/* EXPANDED, WIDE UNBROKEN WORD CONTAINER */}
+                <div className="w-full py-4 px-3 sm:px-5 bg-[#EDE6D6] rounded-2xl border border-[#D6CCA9] flex items-center justify-center min-h-[82px] max-h-[114px] overflow-hidden shadow-inner relative">
+                  {/* Subtle confidential watermark */}
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.04]">
+                    <Shield className="w-24 h-24 text-[#1B2430]" />
+                  </div>
+                  <span className={`font-typewriter ${wordSizeClass} font-bold text-[#1B2430] uppercase tracking-wide text-center max-w-full leading-tight whitespace-nowrap z-10 px-1`}>
                     {player.word}
                   </span>
                 </div>

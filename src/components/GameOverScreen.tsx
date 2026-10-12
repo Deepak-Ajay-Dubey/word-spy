@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { RotateCcw, Home, Trophy, Award } from 'lucide-react';
+import { RotateCcw, Home, Trophy, Award, History } from 'lucide-react';
 import { playClick, playCiviliansWin, playSpyVictory } from '../utils/audio';
 import { GameResult } from '../types';
 import { getScores } from '../utils/scoreManager';
@@ -9,6 +9,7 @@ interface GameOverScreenProps {
   onPlayAgain: () => void;
   onGoHome: () => void;
   onOpenScoreboard: () => void;
+  onOpenHistory: () => void;
 }
 
 export function GameOverScreen({
@@ -16,6 +17,7 @@ export function GameOverScreen({
   onPlayAgain,
   onGoHome,
   onOpenScoreboard,
+  onOpenHistory,
 }: GameOverScreenProps) {
   const isCivilians = result.winner === 'CIVILIANS';
   const scores = getScores();
@@ -89,19 +91,33 @@ export function GameOverScreen({
       {/* Player List with Roles & Points Awarded */}
       <div className="space-y-2 text-left">
         <div className="flex items-center justify-between px-1">
-          <span className="text-xs font-medium text-[#EDE6D6]/60">Round Results & Standings</span>
-          <button
-            id="view-scoreboard-btn"
-            type="button"
-            onClick={() => {
-              playClick();
-              onOpenScoreboard();
-            }}
-            className="text-xs text-[#B08D57] hover:underline flex items-center gap-1 cursor-pointer"
-          >
-            <Trophy className="w-3.5 h-3.5" />
-            <span>All-Time Scoreboard</span>
-          </button>
+          <span className="text-xs font-medium text-[#EDE6D6]/60">Round Results &amp; Standings</span>
+          <div className="flex items-center gap-2.5">
+            <button
+              id="view-history-btn"
+              type="button"
+              onClick={() => {
+                playClick();
+                onOpenHistory();
+              }}
+              className="text-xs text-[#EDE6D6]/70 hover:text-[#EDE6D6] flex items-center gap-1 cursor-pointer"
+            >
+              <History className="w-3.5 h-3.5" />
+              <span>History</span>
+            </button>
+            <button
+              id="view-scoreboard-btn"
+              type="button"
+              onClick={() => {
+                playClick();
+                onOpenScoreboard();
+              }}
+              className="text-xs text-[#B08D57] hover:underline flex items-center gap-1 cursor-pointer"
+            >
+              <Trophy className="w-3.5 h-3.5" />
+              <span>Scoreboard</span>
+            </button>
+          </div>
         </div>
 
         <div className="space-y-2 max-h-[32vh] overflow-y-auto pr-1">
@@ -133,7 +149,7 @@ export function GameOverScreen({
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-[#EDE6D6] truncate">
+                    <span className="text-sm font-semibold text-[#EDE6D6] whitespace-nowrap truncate max-w-[140px]" title={player.name}>
                       {player.name}
                     </span>
 
