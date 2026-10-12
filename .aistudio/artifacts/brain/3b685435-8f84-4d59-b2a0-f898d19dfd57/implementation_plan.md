@@ -1,96 +1,125 @@
-# Word Spy: Expanded Secret Word Container & Wide-Card Optimization
+# Word Spy: Mr. White 3-Decoy Smoke Screen & 1,000+ Word Library Expansion
 
-A targeted plan to widen the secret word reveal card (`#card-back`), eliminate wasted lateral margins, and guarantee that both short and long words render on a single, continuous, highly legible line without mid-word wrapping.
+A strategic gameplay and content update introducing the **3-Decoy Smoke Screen** for Mr. White and expanding the game's core dictionary to over **1,000+ curated word pairs** organized into clean high-level categories.
 
 ---
 
 ## User Review & Critical Decisions
 
 > [!IMPORTANT]
-> **Core Decisions for Element & Layout Expansion**:
-> - **We 100% Agree on Utilizing Both Sides**: Currently, the outer container is locked to `max-w-sm` (384px) with heavy nested paddings (`p-6` to `p-7`), leaving only ~260px of usable width and wasting significant horizontal screen space on both sides.
-> - **Single-Line Guarantee for ALL Words**: By expanding the card width to `w-full max-w-md sm:max-w-lg` and applying fluid typography (`clamp()` scaling + `whitespace-nowrap`), both short words (e.g. *Tea*, *Coffee*) and longer compound words (e.g. *Double Decker Bus*, *Chole Bhature*, *Air Conditioner*) will fit comfortably on a single line.
-> - **Zero Code Modification until Explicit Approval**: As instructed, no files will be edited until you review this plan and give approval to proceed.
+> **Summary of Confirmed User Decisions**:
+> 1. **3-Decoy Smoke Screen for Mr. White**:
+>    - Remove artificial turn-order shielding (Mr. White can speak first or in any natural order).
+>    - On Mr. White's secret card, present **3 broad themes / categories** (1 is the authentic category of the civilian word, and 2 are decoys).
+>    - Displayed as espionage intel on Mr. White's card for bluffing—no mandatory button locks, keeping physical gameplay organic and high-stakes.
+> 2. **Library Expansion to 1,000+ Pairs**:
+>    - Selected from the 4,350 candidate pairs across 156 categories in the provided library.
+>    - Grouped into clean, broad categories in the lobby category picker: **Indian Culture & Life**, **Food & Dining**, **Technology & Media**, **Everyday Home**, **Nature & Wildlife**, **Sports & Recreation**, **Pop Culture & Cinema**, and **Work & Campus**.
+> 3. **Strict Zero-Code-Change Instruction**:
+>    - No application source code has been altered. All execution is deferred until you review this plan and click "Proceed".
 
 ---
 
 ## 1. Overview & Core Concept
 
-- **What It Does**:
-  - Maximizes horizontal space utilization for the secret word reveal container (`div#role-reveal-screen`, `div#reveal-card`, and targeted element `div#card-back`).
-  - Replaces restrictive fixed widths (`max-w-sm`) with a wide, full-bleed card layout (`max-w-md sm:max-w-lg`).
-  - Tightens excessive lateral paddings from nested wrappers, reclaiming up to 80px–100px of active width.
-  - Applies fluid text scaling (`clamp(1.15rem, 5vw, 1.85rem)` with `whitespace-nowrap`) so every word, regardless of length, appears cleanly on one single line.
+### A. The 3-Decoy Smoke Screen (Mr. White Overhaul)
+- **The Problem Solved**: When Mr. White speaks early or goes first, having zero hints makes survival almost impossible. Conversely, artificially forcing Mr. White to the 3rd speaker position leaks his identity to clever players.
+- **The Solution**: 
+  - Every player's turn order is completely natural and unrigged.
+  - When Mr. White flips his card, he sees an espionage radar:
+    ```
+    ┌──────────────────────────────────────────────┐
+    │              TOP SECRET INTEL                │
+    │  Intercepted 3 possible frequency channels:   │
+    │  [ A: Indian Snacks ]                        │
+    │  [ B: Office Tools  ]                        │
+    │  [ C: Space & Astronomy ]                    │
+    │                                              │
+    │  * Only 1 is active. 2 are decoy channels.   │
+    │    Choose your bluff wisely.                 │
+    └──────────────────────────────────────────────┘
+    ```
+  - If Mr. White goes first, he has to gamble on which channel to bluff. If he picks the wrong one, Civilians catch him immediately. If he listens to others first, he can quickly identify the real channel and blend in.
+  - Mr. White can also re-check his 3 decoy channels anytime during the discussion round using the discreet **Peek Word** modal.
+
+### B. Massive 1,000+ Word Library Expansion
+- Expand `fallbackWords.ts` from 468 pairs to **1,000+ high-quality pairs** using the candidate dictionary.
+- Deduplicate pairs and organize micro-categories into 8 clean, vibrant top-level collections for the Category Selector:
+  1. 🍛 **Indian Culture & Street Life** (Festivals, Heritage Sites, Regional Snacks, Street Culture, Local Transport)
+  2. 🍕 **Food & Dining** (Indian Breads & Sweets, Bakery, Cafe Drinks, Rice Dishes, Cooking Methods, Desserts)
+  3. 💻 **Technology & Media** (Social Apps, Digital Content, Gaming Genres, Computer Hardware, Gadgets)
+  4. 🏠 **Everyday Home & Life** (Appliances, Furniture, Storage, Personal Care, DIY Tools)
+  5. 🌿 **Nature & Wildlife** (Indian Wildlife & Birds, Big Cats, Marine Life, Trees, Weather, Landscapes)
+  6. 🏏 **Sports & Games** (Cricket, Athletics, Racket Sports, Traditional Games, Board Games)
+  7. 🎬 **Cinema & Pop Culture** (Bollywood/Regional Cinema, Music & Instruments, Slang, Party Games)
+  8. 💼 **Work, Campus & Career** (Office Communication, Campus Life, Business Documents, Public Services)
 
 ---
 
-## 2. Targeted Element Styling & Layout Changes
+## 2. User Experience & Visual Design
 
-### 1. Element: `div#card-back` (Focused Element)
-- **Current State**: Constrained with `p-6 sm:p-7`, inner padding `px-3`, and narrow flex boundaries, forcing longer words to feel cramped.
-- **Planned Adjustments**:
-  - Optimize padding to `px-4 py-6 sm:px-6 sm:py-7` to maximize usable horizontal canvas.
-  - Expand the inner secret word box from fixed dimensions to `w-full min-h-[76px] py-3.5 px-4`.
-  - Add smooth subtle badge framing with tactile spy borders.
+### A. Mr. White Card Experience (`RoleRevealScreen.tsx` & `DescribeRoundScreen.tsx`)
+- **Visual Identity**: Espionage dossier with retro typewriter styling, amber/crimson alert tones (`#B3261E` / `#B08D57`), and clean unboxed thematic channel tags.
+- **Reveal Animation**:
+  - The card flips with the same uniform sound and timing as Civilians so screen peering never reveals his identity.
+  - The card shows:
+    - `"MR. WHITE"` badge with alert icon.
+    - Subtitle: `"You have no secret word."`
+    - `"Intercepted Signals (1 Real · 2 Decoys)"` panel featuring the 3 randomized themes in high-contrast legible layout.
+    - Tactical tip: `"Listen to early clues or take a calculated bluff."`
+- **Peek Modal Integration**:
+  - In `DescribeRoundScreen.tsx`, when Mr. White holds down the "Peek" button during the clue round, the modal displays the exact same 3 decoy themes, allowing him to verify options mid-game without raising suspicion.
 
-### 2. Parent Container: `div#role-reveal-screen` & `div#reveal-card`
-- **Current State**: `max-w-sm mx-auto px-4` (caps width at 384px, leaving large empty gutters).
-- **Planned Adjustments**:
-  - Expand container width to `w-full max-w-md sm:max-w-lg mx-auto px-2 sm:px-4`.
-  - Allow the 3D flip card (`#reveal-card`) to span the full available width of the screen.
-
-### 3. Typography: Secret Word Text Scaling
-- **Rule**:
-  ```tsx
-  <span className="font-typewriter text-xl sm:text-2xl md:text-3xl font-bold text-[#1B2430] uppercase tracking-wide whitespace-nowrap text-center max-w-full leading-none">
-    {player.word}
-  </span>
-  ```
-- **Fallback Dynamic Fit**: If a word exceeds 14 characters, CSS fluid clamp automatically sizes it to fit the wide box seamlessly without breaking lines or touching the edges.
+### B. Category Filter in Lobby (`HomeScreen.tsx`)
+- Clean, scrollable category selection pills showing clear icons and pair counts (e.g. `Indian Culture (168)`, `Food & Dining (196)`).
+- `"All Categories"` quick toggle remains the default, selecting from all 1,000+ pairs seamlessly.
 
 ---
 
-## 3. UI/UX Suggestions to Make the Interface Even Better
+## 3. Key Product Decisions & Trade-Offs
 
-1. **Category Badge on Secret Word Card**:
-   - Add a quiet, elegant category kicker above the secret word (e.g., `FOOD & KITCHEN · CONFIDENTIAL`) inside the ivory box so players have subtle thematic context without leaking clues.
-2. **Tactile Espionage Stamp / Watermark Texture**:
-   - Add a subtle top-secret security seal icon (`Shield` watermark with 5% opacity) behind the word inside the `#card-back` container to give it an authentic confidential dossier aesthetic.
-3. **Harmonize PassPhoneScreen & ClueTurnScreen**:
-   - Apply the same widened container (`max-w-md sm:max-w-lg`) to the Pass Phone and Clue Speaking views so the entire pass-and-play flow maintains a consistent wide layout.
+| Decision | Chosen Approach | Why | Alternative Considered |
+| :--- | :--- | :--- | :--- |
+| **Turn Order** | Pure random shuffle (Mr. White can be #1) | Eliminates meta-gaming where players deduce Mr. White because he never goes first. | Keeping Mr. White locked to slot #3+ (rejected: leaks role). |
+| **Decoy Interaction** | Passive visual intel briefing on card | Preserves natural verbal party game dynamics; prevents forced screen lag. | Mandatory interactive click to lock in a guess (rejected: adds friction and can reveal role). |
+| **Decoy Selection** | 1 real category + 2 distinct random categories | High contrast between channels makes deducing possible from 1-2 words. | 3 sub-categories of the same topic (too ambiguous to bluff). |
+| **Library Packaging** | Pre-bundled TypeScript data file | Zero network latency, 100% offline-ready, instant game start. | Dynamic database queries (adds unnecessary latency to mobile games). |
 
 ---
 
-## 4. Technical Architecture & Component Mapping
+## 4. Technical Architecture & Data Strategy
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                 App.tsx Phone Frame                         │
-│       Expanded to max-w-md sm:max-w-lg (448px - 512px)      │
-└──────────────────────────────┬──────────────────────────────┘
-                               │
-                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│             div#role-reveal-screen (Expanded)               │
-│        w-full max-w-md sm:max-w-lg px-2 sm:px-4             │
-└──────────────────────────────┬──────────────────────────────┘
-                               │
-                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│                 div#reveal-card (Full Width)                │
-└──────────────┬──────────────────────────────┬───────────────┘
-               │                              │
-     ┌─────────┴──────────┐        ┌──────────┴──────────┐
-     ▼                    ▼        ▼                     ▼
-┌─────────────┐               ┌───────────────────────────────┐
-│ #card-front │               │   #card-back (TARGET ELEMENT) │
-│ Full width  │               │ - Optimized padding px-4 py-6 │
-│ Tap to view │               │ - Wide Word Box (w-full)      │
-│             │               │ - whitespace-nowrap one-line  │
-└─────────────┘               └───────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────┐
+│                        App.tsx & Game State                            │
+│  - Active word pair loaded (e.g. Samosa / Kachori -> "Indian Snacks")  │
+│  - Decoy themes generated for Mr. White: [Snacks, Space, Tools]        │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │
+          ┌─────────────────────────┴─────────────────────────┐
+          ▼                                                   ▼
+┌───────────────────────────────────┐       ┌────────────────────────────────────┐
+│      gameLogic.ts State Engine    │       │     wordService.ts & Library       │
+│ - Unrestricted turn order shuffle │       │ - 1,000+ curated word pairs        │
+│ - Decoy generator:                │       │ - Category taxonomy mapping        │
+│   generateDecoyThemes(realCat)    │       │ - Zero-duplicate filter engine     │
+└─────────────────┬─────────────────┘       └────────────────────────────────────┘
+                  │
+                  ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                   Player Secret Word Interface                         │
+│ - Civilian / Undercover: Shows secret word                             │
+│ - Mr. White: Shows 3 Decoy Signal Channels (1 Real · 2 Decoys)         │
+│ - Peek Modal: Mirrors the 3 Decoys during discussion rounds            │
+└────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Files to Update Upon Approval:
-- `src/components/RoleRevealScreen.tsx`: Widen container, optimize `#card-back` padding, apply fluid single-line word container.
-- `src/components/PassPhoneScreen.tsx`: Match the widened container for smooth visual continuity.
-- `src/App.tsx`: Ensure the main screen container accommodates the wide layout on tablet/desktop viewports.
+### Files Targeted for Execution:
+1. `src/types.ts`: Extend `Player` type with optional `decoyThemes?: string[]` and update category taxonomies.
+2. `src/data/fallbackWords.ts`: Populate with the 1,000+ deduplicated word pairs mapped to high-level parent categories.
+3. `src/utils/gameLogic.ts`: 
+   - Add `generateDecoyThemes(actualCategory: string): string[]`.
+   - Remove index 0 restriction from `generateRoundTurnOrder()`.
+4. `src/components/RoleRevealScreen.tsx`: Render the 3-Decoy espionage radar on Mr. White's card.
+5. `src/components/DescribeRoundScreen.tsx`: Support displaying the 3 decoy channels in the Peek modal for Mr. White.
+6. `src/components/HomeScreen.tsx`: Update category filters to reflect the 8 broad categories with updated counts.

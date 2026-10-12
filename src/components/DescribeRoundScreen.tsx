@@ -175,13 +175,31 @@ export function DescribeRoundScreen({
             <div className="p-4 rounded-xl bg-[#1B2430] border border-[#2C3848] space-y-3 min-h-[130px] flex flex-col justify-center items-center">
               {isHoldingPeek ? (
                 peekPlayer.role === 'MR_WHITE' ? (
-                  <div className="space-y-1">
-                    <span className="text-xs uppercase font-semibold text-[#B3261E] tracking-wider">
-                      MR. WHITE
+                  <div className="space-y-2 py-1 w-full text-center">
+                    <span className="text-xs uppercase font-bold text-[#B3261E] tracking-wider block">
+                      MR. WHITE · NO SECRET WORD
                     </span>
-                    <p className="text-xs text-[#EDE6D6]/80 font-medium">
-                      You have no word! Listen closely to the clues.
+                    <p className="text-[11px] text-[#EDE6D6]/70">
+                      Intercepted Signals (1 Real · 2 Decoys):
                     </p>
+                    <div className="space-y-1 text-left w-full">
+                      {(peekPlayer.decoyThemes && peekPlayer.decoyThemes.length > 0
+                        ? peekPlayer.decoyThemes
+                        : ['Food & Dining', 'Indian Culture', 'Technology & Media']
+                      ).map((theme, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-center justify-between px-2.5 py-1.5 bg-[#243040] rounded-lg border border-[#2C3848] text-[11px]"
+                        >
+                          <span className="font-mono text-[9px] text-[#B08D57] font-bold">
+                            CH 0{idx + 1}
+                          </span>
+                          <span className="font-semibold text-[#EDE6D6]">
+                            {theme}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 ) : (
                   <div className="w-full px-2 py-3.5 bg-[#FAF7F0] rounded-xl border border-[#D6CCA9] overflow-hidden flex items-center justify-center min-h-[64px]">

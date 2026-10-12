@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { Play, HelpCircle, Users, ChevronDown, Check, Layers, X } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Play, HelpCircle, Users, ChevronDown, Check, Layers, X, Sparkles } from 'lucide-react';
 import { playClick } from '../utils/audio';
-import { CATEGORIES } from '../data/fallbackWords';
+import { CATEGORIES, FALLBACK_WORD_PAIRS } from '../data/fallbackWords';
 
 interface HomeScreenProps {
   onStartNewGame: () => void;
@@ -23,6 +23,14 @@ export function HomeScreen({
   const isAllSelected =
     selectedCategories.includes('All Categories') ||
     selectedCategories.length === realCategories.length;
+
+  const categoryPairCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    FALLBACK_WORD_PAIRS.forEach((p) => {
+      counts[p.category] = (counts[p.category] || 0) + 1;
+    });
+    return counts;
+  }, []);
 
   const handleToggleCategory = (cat: string) => {
     playClick();
@@ -214,9 +222,14 @@ export function HomeScreen({
                     : 'bg-[#1B2430] border-[#2C3848] text-[#EDE6D6]/70 hover:bg-[#243040]'
                 }`}
               >
-                <span>All Categories (Mix Everything)</span>
+                <div className="flex items-center gap-2">
+                  <span>All Categories (Mix Everything)</span>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#243040] text-[#B08D57] font-mono">
+                    {FALLBACK_WORD_PAIRS.length}+
+                  </span>
+                </div>
                 <div
-                  className={`w-4 h-4 rounded flex items-center justify-center border ${
+                  className={`w-4 h-4 rounded flex items-center justify-center border shrink-0 ${
                     isAllSelected
                       ? 'bg-[#B08D57] border-[#B08D57] text-[#1B2430]'
                       : 'border-[#2C3848]'
@@ -229,6 +242,7 @@ export function HomeScreen({
               {/* Individual Categories */}
               {realCategories.map((cat) => {
                 const isChecked = isAllSelected || selectedCategories.includes(cat);
+                const count = categoryPairCounts[cat];
                 return (
                   <button
                     key={cat}
@@ -240,9 +254,16 @@ export function HomeScreen({
                         : 'bg-[#1B2430] border-[#2C3848] text-[#EDE6D6]/60 hover:bg-[#222D3B]'
                     }`}
                   >
-                    <span>{cat}</span>
+                    <div className="flex items-center gap-2">
+                      <span>{cat}</span>
+                      {count && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#161E28] text-[#EDE6D6]/50 font-mono">
+                          {count}
+                        </span>
+                      )}
+                    </div>
                     <div
-                      className={`w-4 h-4 rounded flex items-center justify-center border ${
+                      className={`w-4 h-4 rounded flex items-center justify-center border shrink-0 ${
                         isChecked
                           ? 'bg-[#B08D57] border-[#B08D57] text-[#1B2430]'
                           : 'border-[#2C3848]'

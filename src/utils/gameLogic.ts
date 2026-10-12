@@ -41,38 +41,46 @@ export function shuffleArray<T>(array: T[]): T[] {
   return arr;
 }
 
+export const BROAD_DECOY_THEMES = [
+  'Indian Culture',
+  'Food & Dining',
+  'Technology & Media',
+  'Everyday Home & Life',
+  'Nature & Wildlife',
+  'Sports & Games',
+  'Cinema & Pop Culture',
+  'Work & Campus',
+];
+
+/**
+ * Generate 3 broad themes for Mr. White's Smoke Screen:
+ * 1 is the authentic category of the secret word, and 2 are random decoys.
+ */
+export function generateDecoyThemes(actualCategory: string): string[] {
+  // Find closest matching broad theme
+  const matchedTheme =
+    BROAD_DECOY_THEMES.find(
+      (t) =>
+        t.toLowerCase() === actualCategory.toLowerCase() ||
+        actualCategory.toLowerCase().includes(t.toLowerCase()) ||
+        t.toLowerCase().includes(actualCategory.toLowerCase())
+    ) || actualCategory || 'General Knowledge';
+
+  const otherThemes = shuffleArray(
+    BROAD_DECOY_THEMES.filter((t) => t.toLowerCase() !== matchedTheme.toLowerCase())
+  );
+
+  const decoys = otherThemes.slice(0, 2);
+  return shuffleArray([matchedTheme, ...decoys]);
+}
+
 /**
  * Randomize turn order of remaining alive players for a round.
- * Hard constraint: Mr. White can NEVER be placed first (at index 0) in the shuffled order.
- * Undercover has no such restriction.
+ * Natural, fair party shuffle (Mr. White can speak first or in any slot).
  */
 export function generateRoundTurnOrder(alivePlayers: Player[]): Player[] {
   if (alivePlayers.length <= 1) return [...alivePlayers];
-
-  const hasNonMrWhite = alivePlayers.some((p) => p.role !== 'MR_WHITE');
-  if (!hasNonMrWhite) {
-    return shuffleArray(alivePlayers);
-  }
-
-  let shuffled = shuffleArray(alivePlayers);
-  let attempts = 0;
-
-  while (shuffled[0]?.role === 'MR_WHITE' && attempts < 30) {
-    shuffled = shuffleArray(alivePlayers);
-    attempts++;
-  }
-
-  // Guaranteed fallback if still at index 0
-  if (shuffled[0]?.role === 'MR_WHITE') {
-    const nonWhiteIdx = shuffled.findIndex((p) => p.role !== 'MR_WHITE');
-    if (nonWhiteIdx > 0) {
-      const temp = shuffled[0];
-      shuffled[0] = shuffled[nonWhiteIdx];
-      shuffled[nonWhiteIdx] = temp;
-    }
-  }
-
-  return shuffled;
+  return shuffleArray(alivePlayers);
 }
 
 export function assignRolesAndWords(
@@ -91,12 +99,15 @@ export function assignRolesAndWords(
   return names.map((name, index) => {
     const role = shuffledRoles[index];
     let word = '';
+    let decoyThemes: string[] | undefined = undefined;
+
     if (role === 'CIVILIAN') {
       word = wordPair.civilian;
     } else if (role === 'UNDERCOVER') {
       word = wordPair.undercover;
     } else {
       word = 'NO WORD (BLUFF)';
+      decoyThemes = generateDecoyThemes(wordPair.category);
     }
 
     return {
@@ -106,6 +117,7 @@ export function assignRolesAndWords(
       word,
       isEliminated: false,
       codetag: `00${index + 1}`.slice(-3),
+      decoyThemes,
     };
   });
 }

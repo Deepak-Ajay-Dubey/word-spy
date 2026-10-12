@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ArrowRight, ArrowLeft, Eye, EyeOff, AlertCircle, Shield } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Eye, EyeOff, AlertCircle, Shield, Radio } from 'lucide-react';
 import { playCardFlip, playClick, playTick } from '../utils/audio';
 import { Player } from '../types';
 import { getNameSizeClass, getWordSizeClass } from '../utils/textFit';
@@ -147,16 +147,42 @@ export function RoleRevealScreen({
             </div>
 
             {isMrWhite ? (
-              <div className="space-y-3 my-auto w-full px-2">
-                <div className="w-10 h-10 mx-auto rounded-full bg-[#B3261E]/10 flex items-center justify-center text-[#B3261E]">
-                  <AlertCircle className="w-6 h-6" />
+              <div className="space-y-2.5 my-auto w-full px-1 sm:px-2">
+                <div className="flex items-center justify-center gap-1.5 text-[11px] text-[#B3261E] uppercase tracking-widest font-bold">
+                  <AlertCircle className="w-4 h-4 text-[#B3261E]" />
+                  <span>Agent Role: Mr. White</span>
                 </div>
-                <div className="font-typewriter text-2xl font-bold text-[#B3261E] uppercase tracking-wider">
-                  MR. WHITE
-                </div>
-                <div className="p-3 bg-[#EDE6D6] rounded-xl border border-[#D6CCA9] w-full">
-                  <p className="text-xs text-[#1B2430]/80 font-medium leading-relaxed">
-                    You have NO word. Listen carefully and bluff your way through the clues!
+
+                <div className="p-3 bg-[#EDE6D6] rounded-2xl border border-[#D6CCA9] w-full text-center space-y-2.5 shadow-inner">
+                  <div className="font-typewriter text-xl font-bold text-[#B3261E] uppercase tracking-wider">
+                    NO SECRET WORD
+                  </div>
+                  <p className="text-[11px] text-[#1B2430]/80 font-medium leading-tight">
+                    Intercepted 3 possible themes (1 is real, 2 are decoys):
+                  </p>
+
+                  {/* 3-Decoy Smoke Screen Channels */}
+                  <div className="grid grid-cols-1 gap-1.5 pt-0.5 text-left">
+                    {(player.decoyThemes && player.decoyThemes.length > 0
+                      ? player.decoyThemes
+                      : ['Food & Dining', 'Indian Culture', 'Technology & Media']
+                    ).map((theme, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center justify-between px-3 py-2 bg-[#F6F2EA] border border-[#D6CCA9] rounded-xl text-xs font-semibold text-[#1B2430]"
+                      >
+                        <span className="font-mono text-[10px] text-[#B08D57] font-bold tracking-wider">
+                          CHANNEL 0{idx + 1}
+                        </span>
+                        <span className="font-typewriter text-xs text-[#1B2430] tracking-wide font-bold">
+                          {theme}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <p className="text-[10px] text-[#1B2430]/70 italic leading-snug pt-0.5">
+                    If you bluff on the wrong channel, you will be caught!
                   </p>
                 </div>
               </div>

@@ -268,6 +268,8 @@ export default function App() {
           {phase === 'ELIMINATION_REVEAL' && lastEliminatedPlayer && (
             <EliminationRevealModal
               eliminatedPlayer={lastEliminatedPlayer}
+              players={players}
+              roundNumber={roundNumber}
               onProceed={handleProceedAfterEliminationReveal}
             />
           )}

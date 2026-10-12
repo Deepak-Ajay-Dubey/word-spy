@@ -8,6 +8,7 @@ export interface Player {
   isEliminated: boolean;
   eliminatedRound?: number;
   codetag: string;
+  decoyThemes?: string[];
 }
 
 export interface WordPair {
